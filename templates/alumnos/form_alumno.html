@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title mb-0">{{ titulo }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Por favor corrige los siguientes errores:</strong>
+                            <ul>
+                                {% for field in form %}
+                                    {% for error in field.errors %}
+                                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <h5 class="mb-3 text-primary">
+                        <i class="fas fa-id-card"></i> Información Personal
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_dni" class="form-label">DNI *</label>
+                                {{ form.dni }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_codigo_alumno" class="form-label">Código de Alumno *</label>
+                                {{ form.codigo_alumno }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_nombres" class="form-label">Nombres *</label>
+                                {{ form.nombres }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_apellidos" class="form-label">Apellidos *</label>
+                                {{ form.apellidos }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="id_fecha_nacimiento" class="form-label">Fecha de Nacimiento *</label>
+                                {{ form.fecha_nacimiento }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="id_genero" class="form-label">Género *</label>
+                                {{ form.genero }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="id_foto" class="form-label">Foto</label>
+                                {{ form.foto }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 text-primary mt-4">
+                        <i class="fas fa-address-book"></i> Información de Contacto
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_email" class="form-label">Correo Electrónico *</label>
+                                {{ form.email }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_telefono" class="form-label">Teléfono *</label>
+                                {{ form.telefono }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_direccion" class="form-label">Dirección *</label>
+                        {{ form.direccion }}
+                    </div>
+
+                    <h5 class="mb-3 text-primary mt-4">
+                        <i class="fas fa-graduation-cap"></i> Información Académica
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_fecha_ingreso" class="form-label">Fecha de Ingreso *</label>
+                                {{ form.fecha_ingreso }}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="id_estado" class="form-label">Estado *</label>
+                                {{ form.estado }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="id_observaciones" class="form-label">Observaciones</label>
+                        {{ form.observaciones }}
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> {{ accion }} Alumno
+                        </button>
+                        <a href="{% url 'alumnos:lista_alumnos' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    <div>
+        <a href="{% url 'alumnos:lista_alumnos' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a Lista
+        </a>
+        <button onclick="window.print()" class="btn btn-primary">
+            <i class="fas fa-print"></i> Imprimir Reporte
+        </button>
+    </div>
+</div>
+
+<!-- Filtros del Reporte -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="card-title mb-0">Filtros del Reporte</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="estado" class="form-label">Estado</label>
+                <select name="estado" id="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="A" {% if request.GET.estado == 'A' %}selected{% endif %}>Activo</option>
+                    <option value="I" {% if request.GET.estado == 'I' %}selected{% endif %}>Inactivo</option>
+                    <option value="E" {% if request.GET.estado == 'E' %}selected{% endif %}>Egresado</option>
+                    <option value="R" {% if request.GET.estado == 'R' %}selected{% endif %}>Retirado</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="genero" class="form-label">Género</label>
+                <select name="genero" id="genero" class="form-select">
+                    <option value="">Todos</option>
+                    <option value="M" {% if request.GET.genero == 'M' %}selected{% endif %}>Masculino</option>
+                    <option value="F" {% if request.GET.genero == 'F' %}selected{% endif %}>Femenino</option>
+                    <option value="O" {% if request.GET.genero == 'O' %}selected{% endif %}>Otro</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="fecha_ingreso_desde" class="form-label">Fecha Ingreso Desde</label>
+                <input type="date" name="fecha_ingreso_desde" id="fecha_ingreso_desde" 
+                       class="form-control" value="{{ request.GET.fecha_ingreso_desde }}">
+            </div>
+            <div class="col-md-3">
+                <label for="fecha_ingreso_hasta" class="form-label">Fecha Ingreso Hasta</label>
+                <input type="date" name="fecha_ingreso_hasta" id="fecha_ingreso_hasta" 
+                       class="form-control" value="{{ request.GET.fecha_ingreso_hasta }}">
+            </div>
+            <div class="col-md-12">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-chart-bar"></i> Generar Reporte
+                </button>
+                <a href="{% url 'alumnos:reporte_alumnos' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-undo"></i> Limpiar Filtros
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Resumen Estadístico -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3>{{ total_alumnos }}</h3>
+                <p class="mb-0">Total Alumnos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h3>{{ alumnos_activos }}</h3>
+                <p class="mb-0">Activos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <h3>{{ alumnos_inactivos }}</h3>
+                <p class="mb-0">Inactivos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h3>{{ alumnos_egresados }}</h3>
+                <p class="mb-0">Egresados</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estadísticas Detalladas -->
+<div class="row mb-4">
+    <!-- Distribución por Género -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Distribución por Género</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <div class="border rounded p-3">
+                            <h4 class="text-primary">{{ masculinos }}</h4>
+                            <p class="mb-0">Masculino</p>
+                            <small class="text-muted">
+                                {% if total_alumnos > 0 %}
+                                    {{ masculinos|floatformat:0 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3">
+                            <h4 class="text-success">{{ femeninos }}</h4>
+                            <p class="mb-0">Femenino</p>
+                            <small class="text-muted">
+                                {% if total_alumnos > 0 %}
+                                    {{ femeninos|floatformat:0 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="border rounded p-3">
+                            <h4 class="text-info">{{ otros }}</h4>
+                            <p class="mb-0">Otro</p>
+                            <small class="text-muted">
+                                {% if total_alumnos > 0 %}
+                                    {{ otros|floatformat:0 }}%
+                                {% else %}
+                                    0%
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Distribución por Edad -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Distribución por Edad</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="border rounded p-2">
+                            <h6 class="text-primary">{{ menores_18 }}</h6>
+                            <small class="text-muted">Menores 18</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-2">
+                            <h6 class="text-success">{{ entre_18_25 }}</h6>
+                            <small class="text-muted">18-25 años</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-2">
+                            <h6 class="text-warning">{{ entre_26_35 }}</h6>
+                            <small class="text-muted">26-35 años</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border rounded p-2">
+                            <h6 class="text-info">{{ mayores_35 }}</h6>
+                            <small class="text-muted">Mayores 35</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabla de Alumnos -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0">
+            Lista de Alumnos 
+            {% if filtros_aplicados %}
+                <small class="text-muted">(Filtrados)</small>
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if alumnos %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Código</th>
+                        <th>Alumno</th>
+                        <th>DNI</th>
+                        <th>Edad</th>
+                        <th>Género</th>
+                        <th>Estado</th>
+                        <th>Fecha Ingreso</th>
+                        <th>Contacto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alumno in alumnos %}
+                    <tr>
+                        <td><strong>{{ alumno.codigo_alumno }}</strong></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm me-3">
+                                    {% if alumno.foto %}
+                                        <img src="{{ alumno.foto.url }}" alt="{{ alumno.nombre_completo }}" 
+                                             class="rounded-circle" width="40" height="40">
+                                    {% else %}
+                                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <strong>{{ alumno.nombre_completo }}</strong>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ alumno.dni }}</td>
+                        <td>
+                            <span class="badge bg-info">{{ alumno.edad }} años</span>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if alumno.genero == 'M' %}bg-primary
+                                {% elif alumno.genero == 'F' %}bg-success
+                                {% else %}bg-info{% endif %}">
+                                {{ alumno.get_genero_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if alumno.estado == 'A' %}bg-success
+                                {% elif alumno.estado == 'I' %}bg-secondary
+                                {% elif alumno.estado == 'E' %}bg-primary
+                                {% else %}bg-danger{% endif %}">
+                                {{ alumno.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>{{ alumno.fecha_ingreso }}</td>
+                        <td>
+                            <small>
+                                <i class="fas fa-envelope"></i> {{ alumno.email }}<br>
+                                <i class="fas fa-phone"></i> {{ alumno.telefono }}
+                            </small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Resumen al final -->
+        <div class="mt-4 p-3 bg-light rounded">
+            <h6>Resumen del Reporte:</h6>
+            <div class="row">
+                <div class="col-md-3">
+                    <strong>Total de registros:</strong> {{ total_alumnos }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Alumnos activos:</strong> {{ alumnos_activos }}
+                </div>
+                <div class="col-md-3">
+                    <strong>Fecha de generación:</strong> {% now "d/m/Y H:i" %}
+                </div>
+                <div class="col-md-3">
+                    <strong>Generado por:</strong> {{ user.username }}
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-chart-bar fa-4x text-muted mb-3"></i>
+            <h5>No hay datos para el reporte</h5>
+            <p class="text-muted">No se encontraron alumnos con los filtros aplicados.</p>
+            <a href="{% url 'alumnos:reporte_alumnos' %}" class="btn btn-primary">
+                <i class="fas fa-undo"></i> Ver Todos los Alumnos
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Estilos para impresión -->
+<style>
+@media print {
+    .btn, .card-header .btn, .navbar {
+        display: none !important;
+    }
+    .card {
+        border: 1px solid #000 !important;
+    }
+    .table th {
+        background-color: #f8f9fa !important;
+        color: #000 !important;
+    }
+}
+</style>
+{% endblock %}

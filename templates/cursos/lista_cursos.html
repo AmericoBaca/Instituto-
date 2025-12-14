@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    <a href="{% url 'cursos:nuevo_curso' %}" class="btn btn-success">
+        <i class="fas fa-plus"></i> Nuevo Curso
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="nivel" class="form-label">Nivel</label>
+                <select name="nivel" id="nivel" class="form-select">
+                    <option value="">Todos los niveles</option>
+                    <option value="B" {% if request.GET.nivel == 'B' %}selected{% endif %}>Básico</option>
+                    <option value="I" {% if request.GET.nivel == 'I' %}selected{% endif %}>Intermedio</option>
+                    <option value="A" {% if request.GET.nivel == 'A' %}selected{% endif %}>Avanzado</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="estado" class="form-label">Estado</label>
+                <select name="estado" id="estado" class="form-select">
+                    <option value="">Todos los estados</option>
+                    <option value="A" {% if request.GET.estado == 'A' %}selected{% endif %}>Activo</option>
+                    <option value="I" {% if request.GET.estado == 'I' %}selected{% endif %}>Inactivo</option>
+                    <option value="C" {% if request.GET.estado == 'C' %}selected{% endif %}>Completado</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                <a href="{% url 'cursos:lista_cursos' %}" class="btn btn-outline-secondary">Limpiar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tabla de cursos -->
+<div class="card">
+    <div class="card-body">
+        {% if cursos %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Nivel</th>
+                        <th>Duración</th>
+                        <th>Precio</th>
+                        <th>Cupos</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for curso in cursos %}
+                    <tr>
+                        <td><strong>{{ curso.codigo }}</strong></td>
+                        <td>{{ curso.nombre }}</td>
+                        <td>
+                            <span class="badge 
+                                {% if curso.nivel == 'B' %}bg-info
+                                {% elif curso.nivel == 'I' %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                                {{ curso.get_nivel_display }}
+                            </span>
+                        </td>
+                        <td>{{ curso.duracion }} hrs</td>
+                        <td>S/. {{ curso.precio }}</td>
+                        <td>
+                            <span class="badge {% if curso.cupos_disponibles > 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                {% comment %} {{ curso.alumnos_inscritos }}/{{ curso.cupo_maximo }} {% endcomment %}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge 
+                                {% if curso.estado == 'A' %}bg-success
+                                {% elif curso.estado == 'I' %}bg-secondary
+                                {% else %}bg-primary{% endif %}">
+                                {{ curso.get_estado_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'cursos:detalle_curso' curso.id %}" class="btn btn-info" title="Ver">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'cursos:editar_curso' curso.id %}" class="btn btn-warning" title="Editar">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'cursos:eliminar_curso' curso.id %}" class="btn btn-danger" title="Eliminar">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-book fa-3x text-muted mb-3"></i>
+            <h5>No hay cursos registrados</h5>
+            <p class="text-muted">Comienza creando el primer curso.</p>
+            <a href="{% url 'cursos:nuevo_curso' %}" class="btn btn-primary">Crear Primer Curso</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    <div>
+        {% if matricula.puede_ser_editada %}
+        <a href="{% url 'matriculas:editar_matricula' matricula.id %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        {% endif %}
+        {% if matricula.estado == 'P' %}
+        <a href="{% url 'matriculas:procesar_matricula' matricula.id %}" class="btn btn-success">
+            <i class="fas fa-play-circle"></i> Activar
+        </a>
+        {% endif %}
+        <a href="{% url 'matriculas:lista_matriculas' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Información de la Matrícula -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información de la Matrícula</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>ID Matrícula:</strong> #{{ matricula.id }}</p>
+                        <p><strong>Fecha de Matrícula:</strong> {{ matricula.fecha_matricula }}</p>
+                        <p><strong>Estado:</strong> 
+                            <span class="badge 
+                                {% if matricula.estado == 'A' %}bg-success
+                                {% elif matricula.estado == 'P' %}bg-warning
+                                {% elif matricula.estado == 'C' %}bg-primary
+                                {% elif matricula.estado == 'R' %}bg-danger
+                                {% else %}bg-secondary{% endif %}">
+                                {{ matricula.get_estado_display }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Fecha de Inicio:</strong> {{ matricula.fecha_inicio }}</p>
+                        <p><strong>Fecha de Fin:</strong> {{ matricula.fecha_fin|default:"-" }}</p>
+                        <p><strong>Duración:</strong> 
+                            {% if matricula.duracion_dias %}
+                                <span class="badge bg-info">{{ matricula.duracion_dias }} días</span>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+                
+                {% if matricula.calificacion %}
+                <div class="alert 
+                    {% if matricula.calificacion >= 13 %}alert-success
+                    {% elif matricula.calificacion >= 10 %}alert-warning
+                    {% else %}alert-danger{% endif %}">
+                    <strong>Calificación Final:</strong> {{ matricula.calificacion }}
+                </div>
+                {% endif %}
+
+                {% if matricula.observaciones %}
+                <div class="mt-3">
+                    <strong>Observaciones:</strong>
+                    <p class="mt-2">{{ matricula.observaciones|linebreaks }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Información de Auditoría -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información del Sistema</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Creado por:</strong> {{ matricula.creado_por.username }}</p>
+                <p><strong>Fecha de creación:</strong> {{ matricula.created_at|date:"d/m/Y H:i" }}</p>
+                <p><strong>Última actualización:</strong> {{ matricula.updated_at|date:"d/m/Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información del Alumno y Curso -->
+    <div class="col-md-6">
+        <!-- Información del Alumno -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información del Alumno</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    {% if matricula.alumno.foto %}
+                        <img src="{{ matricula.alumno.foto.url }}" alt="{{ matricula.alumno.nombre_completo }}" 
+                             class="rounded-circle me-3" width="60" height="60">
+                    {% else %}
+                        <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-3" 
+                             style="width: 60px; height: 60px;">
+                            <i class="fas fa-user text-white fa-2x"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-1">{{ matricula.alumno.nombre_completo }}</h6>
+                        <p class="text-muted mb-0">
+                            {{ matricula.alumno.codigo_alumno }} | {{ matricula.alumno.dni }}
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Email:</strong> {{ matricula.alumno.email }}</p>
+                        <p><strong>Teléfono:</strong> {{ matricula.alumno.telefono }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Edad:</strong> {{ matricula.alumno.edad }} años</p>
+                        <p><strong>Estado:</strong> 
+                            <span class="badge 
+                                {% if matricula.alumno.estado == 'A' %}bg-success
+                                {% else %}bg-secondary{% endif %}">
+                                {{ matricula.alumno.get_estado_display }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <a href="{% url 'alumnos:detalle_alumno' matricula.alumno.id %}" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-external-link-alt"></i> Ver Alumno
+                </a>
+            </div>
+        </div>
+
+        <!-- Información del Curso -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información del Curso</h5>
+            </div>
+            <div class="card-body">
+                <h6 class="mb-2">{{ matricula.curso.nombre }}</h6>
+                <p class="text-muted mb-2">{{ matricula.curso.codigo }}</p>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Nivel:</strong> 
+                            <span class="badge 
+                                {% if matricula.curso.nivel == 'B' %}bg-info
+                                {% elif matricula.curso.nivel == 'I' %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                                {{ matricula.curso.get_nivel_display }}
+                            </span>
+                        </p>
+                        <p><strong>Duración:</strong> {{ matricula.curso.duracion }} hrs</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Precio:</strong> S/. {{ matricula.curso.precio }}</p>
+                        <p><strong>Profesor:</strong> {{ matricula.curso.profesor }}</p>
+                    </div>
+                </div>
+                
+                <div class="mt-2">
+                    <strong>Cupos:</strong>
+                    <div class="progress mt-1">
+                        {% widthratio matricula.curso.alumnos_inscritos matricula.curso.cupo_maximo 100 as width %}
+                        <div class="progress-bar
+                            {% if matricula.curso.cupos_disponibles > 0 %}bg-success{% else %}bg-danger{% endif %}"
+                            style="width: {{ width }}%">
+                            {{ matricula.curso.alumnos_inscritos }}/{{ matricula.curso.cupo_maximo }}
+                        </div>
+                    </div>
+                </div>
+                
+                <a href="{% url 'cursos:detalle_curso' matricula.curso.id %}" class="btn btn-outline-success btn-sm mt-2">
+                    <i class="fas fa-external-link-alt"></i> Ver Curso
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

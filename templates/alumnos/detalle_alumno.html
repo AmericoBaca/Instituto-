@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>{{ titulo }}</h2>
+    <div>
+        <a href="{% url 'alumnos:editar_alumno' alumno.id %}" class="btn btn-warning">
+            <i class="fas fa-edit"></i> Editar
+        </a>
+        <a href="{% url 'alumnos:lista_alumnos' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Información Principal -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                {% if alumno.foto %}
+                    <img src="{{ alumno.foto.url }}" alt="{{ alumno.nombre_completo }}" 
+                         class="rounded-circle mb-3" width="150" height="150">
+                {% else %}
+                    <div class="bg-secondary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" 
+                         style="width: 150px; height: 150px;">
+                        <i class="fas fa-user fa-4x text-white"></i>
+                    </div>
+                {% endif %}
+                
+                <h4>{{ alumno.nombre_completo }}</h4>
+                <p class="text-muted">{{ alumno.codigo_alumno }}</p>
+                
+                <div class="mb-3">
+                    <span class="badge 
+                        {% if alumno.estado == 'A' %}bg-success
+                        {% elif alumno.estado == 'I' %}bg-secondary
+                        {% elif alumno.estado == 'E' %}bg-primary
+                        {% else %}bg-danger{% endif %} fs-6">
+                        {{ alumno.get_estado_display }}
+                    </span>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{% url 'alumnos:editar_alumno' alumno.id %}" class="btn btn-outline-primary">
+                        <i class="fas fa-edit"></i> Editar Perfil
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información de Contacto -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="card-title mb-0">Contacto</h6>
+            </div>
+            <div class="card-body">
+                <p><i class="fas fa-envelope text-primary me-2"></i> {{ alumno.email }}</p>
+                <p><i class="fas fa-phone text-success me-2"></i> {{ alumno.telefono }}</p>
+                <p><i class="fas fa-map-marker-alt text-danger me-2"></i> {{ alumno.direccion|linebreaks }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Información Detallada -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información Personal</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>DNI:</strong> {{ alumno.dni }}</p>
+                        <p><strong>Fecha de Nacimiento:</strong> {{ alumno.fecha_nacimiento }}</p>
+                        <p><strong>Edad:</strong> <span class="badge bg-info">{{ alumno.edad }} años</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Género:</strong> {{ alumno.get_genero_display }}</p>
+                        <p><strong>Fecha de Ingreso:</strong> {{ alumno.fecha_ingreso }}</p>
+                        <p><strong>Tiempo en el Instituto:</strong> 
+                            <span class="badge bg-success">{{ alumno.fecha_ingreso|timesince }}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Observaciones -->
+        {% if alumno.observaciones %}
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Observaciones</h5>
+            </div>
+            <div class="card-body">
+                <p>{{ alumno.observaciones|linebreaks }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Información de Auditoría -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Información del Sistema</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Creado por:</strong> {{ alumno.creado_por.username }}</p>
+                        <p><strong>Fecha de creación:</strong> {{ alumno.created_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Última actualización:</strong> {{ alumno.updated_at|date:"d/m/Y H:i" }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cursos del Alumno (placeholder) -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Cursos Inscritos</h5>
+            </div>
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-book-open fa-2x mb-2"></i>
+                <p>No hay cursos inscritos</p>
+                <small>Esta sección se completará con el módulo de matrículas</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

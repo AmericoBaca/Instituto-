@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2>Dashboard</h2>
+        <p class="lead">Bienvenido al panel de control del sistema</p>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Alumnos</h5>
+                <p class="card-text">Gestionar estudiantes del instituto</p>
+                <a href="{% url 'alumnos:lista_alumnos' %}" class="btn btn-light">Ver Alumnos</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Cursos</h5>
+                <p class="card-text">Administrar cursos disponibles</p>
+                <a href="{% url 'cursos:lista_cursos' %}" class="btn btn-light">Ver Cursos</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Matrículas</h5>
+                <p class="card-text">Gestionar inscripciones</p>
+                <a href="{% url 'matriculas:lista_matriculas' %}" class="btn btn-light">Ver Matrículas</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Información del Usuario</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Usuario:</strong> {{ user.username }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Último acceso:</strong> {{ user.last_login }}</p>
+                <p><strong>Fecha de registro:</strong> {{ user.date_joined }}</p>
+                <div class="mt-3">
+                    <a href="{% url 'auth_app:profile' %}" class="btn btn-outline-primary btn-sm">Mi Perfil</a>
+                    <a href="{% url 'auth_app:change_password' %}" class="btn btn-outline-secondary btn-sm">Cambiar Contraseña</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Acciones Rápidas</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'alumnos:nuevo_alumno' %}" class="btn btn-outline-primary">Nuevo Alumno</a>
+                    <a href="{% url 'cursos:nuevo_curso' %}" class="btn btn-outline-success">Nuevo Curso</a>
+                    <a href="{% url 'matriculas:nueva_matricula' %}" class="btn btn-outline-warning">Nueva Matrícula</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

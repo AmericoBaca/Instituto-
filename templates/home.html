@@ -1,0 +1,250 @@
+
+{% extends 'base.html' %}
+
+{% block css %}
+    <style>
+        body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+       
+        #chatbot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            max-height: 500px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            flex-direction: column;
+            z-index: 1050;
+        }
+        #chat-messages {
+        padding: 15px;
+        overflow-y: auto;
+        flex-grow: 1;
+        max-height: 350px;
+        }
+        .message { 
+        padding: 8px 12px; 
+        margin: 6px 0; 
+        border-radius: 10px; 
+        max-width: 80%; 
+        }
+        .user { 
+        background: #e3f2fd; 
+        margin-left: auto; 
+        }
+        .bot { 
+        background: #f8f9fa; 
+        border-left: 3px solid #4a6fa5;
+        }
+        #chat-input {
+        display: flex;
+        padding: 10px;
+        border-top: 1px solid #eee;
+        }
+        #chat-input input {
+        flex: 1;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        padding: 8px 15px;
+        }
+        #chat-input button {
+        margin-left: 10px;
+        border-radius: 20px;
+        }
+        .btn-admin {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1040;
+        }
+    </style>
+{% endblock css %}
+
+
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-md-8 text-center">
+            <h1 class="display-4">Bienvenido al Sistema del Instituto</h1>
+            <p class="lead">Sistema de gestión de alumnos y matrículas</p>
+            
+            {% if user.is_authenticated %}
+                <div class="mt-4">
+                    <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg">Ir al Dashboard</a>
+                </div>
+            {% else %}
+                <div class="mt-4">
+                    {% comment %} <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-3">Iniciar Sesión</a> {% endcomment %}
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary btn-lg">Registrarse</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div id="chatbot">
+        <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+            <strong><i class="fas fa-robot me-2"></i>Asistente Virtual</strong>
+            <button id="closeChat" class="btn btn-sm btn-light">&times;</button>
+        </div>
+        <div id="chat-messages">
+            <div class="message bot">¡Hola! 👋 Soy tu asistente virtual de Instituto. ¿En qué puedo ayudarte?</div>
+        </div>
+        <div id="chat-input">
+            <input type="text" id="user-input" placeholder="Escribe tu pregunta..." autocomplete="off">
+            <button id="send-btn" class="btn btn-primary">Enviar</button>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        function addMessage(text, isUser = false) {
+            const messageClass = isUser ? 'user' : 'bot';
+            const messageDiv = `
+                <div class="message ${messageClass}">
+                    ${text}
+                </div>
+            `;
+            $("#chat-messages").append(messageDiv);
+            // Auto-scroll al último mensaje
+            $("#chat-messages").scrollTop($("#chat-messages")[0].scrollHeight);
+        }
+    
+        $(document).ready(function() {
+            // Configuración
+            const DJANGO_API_URL = 'cursos/api/chatbot/';
+            
+            // Obtener token CSRF
+            function getCSRFToken() {
+                // Intentar obtener de varias formas
+                let csrfToken = $('meta[name="csrf-token"]').attr('content');
+                if (!csrfToken) {
+                    csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+                }
+                if (!csrfToken) {
+                    console.warn('Token CSRF no encontrado');
+                }
+                return csrfToken;
+            }
+            
+            // Función para enviar mensaje
+            async function sendMessageToDjango(message) {
+                try {
+                    const csrfToken = getCSRFToken();
+                    
+                    const response = await $.ajax({
+                        url: DJANGO_API_URL,
+                        type: 'POST',
+                        dataType: 'json',
+                        data: JSON.stringify({ 
+                            message: message 
+                        }),
+                        contentType: 'application/json',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        beforeSend: function(xhr) {
+                            if (csrfToken) {
+                                xhr.setRequestHeader('X-CSRFToken', csrfToken);
+                            }
+                        }
+                    });
+                    
+                    return response.reply;
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    
+                    if (error.status === 403) {
+                        return 'Error de seguridad (CSRF). Por favor, recarga la página.';
+                    }
+                    
+                    return 'Error al comunicarse con el servidor. Intenta nuevamente.';
+                }
+            }
+
+            
+            // Manejar envío de mensaje
+            async function handleSendMessage() {
+                const userMessage = $("#user-input").val().trim();
+                
+                if (!userMessage) return;
+                
+                // Mostrar mensaje del usuario
+                addMessage(userMessage, true);
+                
+                // Limpiar input
+                $("#user-input").val('');
+                $("#user-input").focus();
+                
+                // Mostrar indicador de "escribiendo..."
+                const typingIndicator = `
+                    <div class="message bot typing">
+                        <span class="typing-dots">
+                            <span>.</span><span>.</span><span>.</span>
+                        </span>
+                    </div>
+                `;
+                $("#chat-messages").append(typingIndicator);
+                $("#chat-messages").scrollTop($("#chat-messages")[0].scrollHeight);
+                
+                // Enviar al backend Django
+                const botReply = await sendMessageToDjango(userMessage);
+                
+                // Eliminar indicador de "escribiendo"
+                $("#chat-messages").find('.typing').remove();
+                
+                // Mostrar respuesta del bot
+                addMessage(botReply);
+            }
+            
+            // Event Listeners
+            $("#send-btn").on('click', handleSendMessage);
+            
+            $("#user-input").on('keypress', function(e) {
+                if (e.which === 13) { // Enter key
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            });
+            
+            $("#closeChat").on('click', function() {
+                $("#chatbot").hide();
+            });
+            
+            // CSS para indicador de escritura
+            const style = `
+                <style>
+                    .message.bot.typing {
+                        opacity: 0.8;
+                    }
+                    .typing-dots {
+                        display: inline-block;
+                    }
+                    .typing-dots span {
+                        animation: typing 1.4s infinite;
+                        display: inline-block;
+                    }
+                    .typing-dots span:nth-child(2) {
+                        animation-delay: 0.2s;
+                    }
+                    .typing-dots span:nth-child(3) {
+                        animation-delay: 0.4s;
+                    }
+                    @keyframes typing {
+                        0%, 60%, 100% { transform: translateY(0); }
+                        30% { transform: translateY(-5px); }
+                    }
+                </style>
+            `;
+            $('head').append(style);
+        });
+    </script>
+
+{% endblock js %}

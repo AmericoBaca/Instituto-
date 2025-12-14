@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="card-title mb-0">{{ titulo }}</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                    <h5>¿Estás seguro de que quieres eliminar esta matrícula?</h5>
+                </div>
+                
+                <div class="alert alert-warning">
+                    <strong>Matrícula a eliminar:</strong><br>
+                    <strong>{{ matricula.alumno.nombre_completo }}</strong><br>
+                    <small class="text-muted">
+                        Curso: {{ matricula.curso.nombre }}<br>
+                        Código: {{ matricula.curso.codigo }}
+                    </small>
+                </div>
+
+                <p class="text-danger">
+                    <strong>¡Advertencia!</strong> Esta acción no se puede deshacer.
+                </p>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                        <button type="submit" class="btn btn-danger me-md-2">
+                            <i class="fas fa-trash"></i> Sí, Eliminar
+                        </button>
+                        <a href="{% url 'matriculas:detalle_matricula' matricula.id %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
